@@ -114,10 +114,12 @@ fn get_ansi_code_for_color_string(s: &str) -> Option<String> {
     let mut result = String::from("\u{001B}[");
 
     let mut last_loop_set = false;
-    for (index, fragment) in fragments.enumerate() {
+    for fragment in fragments {
+        if fragment == "" {
+            panic!("");
+        }
         if last_loop_set {
             result.push(';');
-            last_loop_set = false;
         }
 
         let number_code = match fragment {
