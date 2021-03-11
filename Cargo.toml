@@ -2,6 +2,7 @@
 name = "ansi-colors-macro"
 description = "A proc-macro for creating ANSI colored strings at compile time"
 license = "Apache-2.0 OR MIT"
+repository = "https://github.com/SirWindfield/ansi-colors-macro-rs"
 version = "0.1.0"
 authors = ["SirWindfield <SirWindfield@users.noreply.github.com>"]
 edition = "2018"
