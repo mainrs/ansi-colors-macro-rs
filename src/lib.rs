@@ -54,7 +54,8 @@ pub fn ansi_string(args: TokenStream) -> TokenStream {
 
                                     let color_name =
                                         unsafe { std::str::from_utf8_unchecked(color.as_ref()) };
-                                    if let Some(color) = get_ansi_code_for_color_name(color_name) {
+                                    if let Some(color) = get_ansi_code_for_color_string(color_name)
+                                    {
                                         color.as_bytes().into_iter().for_each(|b| result.push(*b));
                                     }
                                 }
@@ -107,26 +108,68 @@ fn index(s: impl AsRef<[u8]>, index: usize) -> u8 {
     }
 }
 
-fn get_ansi_code_for_color_name(name: &str) -> Option<&str> {
-    match name {
-        "black" => Some("\u{001B}[30m"),
-        "red" => Some("\u{001B}[31m"),
-        "green" => Some("\u{001B}[32m"),
-        "yellow" => Some("\u{001B}[33m"),
-        "blue" => Some("\u{001B}[34m"),
-        "magenta" => Some("\u{001B}[35m"),
-        "cyan" => Some("\u{001B}[36m"),
-        "white" => Some("\u{001B}[37m"),
-        "gray" => Some("\u{001B}[90m"),
-        "bright_red" => Some("\u{001B}[91m"),
-        "bright_green" => Some("\u{001B}[92m"),
-        "bright_yellow" => Some("\u{001B}[93m"),
-        "bright_blue" => Some("\u{001B}[94m"),
-        "bright_magenta" => Some("\u{001B}[95m"),
-        "bright_cyan" => Some("\u{001B}[96m"),
-        "bright_white" => Some("\u{001B}[97m"),
-        _ => None,
+fn get_ansi_code_for_color_string(s: &str) -> Option<String> {
+    // Multiple styles are separated by a dot.
+    let fragments = s.split(".");
+    let mut result = String::from("\u{001B}[");
+
+    let mut last_loop_set = false;
+    for (index, fragment) in fragments.enumerate() {
+        if last_loop_set {
+            result.push(';');
+            last_loop_set = false;
+        }
+
+        let number_code = match fragment {
+            "bold" => "1",
+            "dim" => "2",
+            "italic" => "3",
+            "underline" => "4",
+            "inverse" => "7",
+            "hidden" => "8",
+            "strikethrough" => "9",
+            "black" => "30",
+            "red" => "31",
+            "green" => "32",
+            "yellow" => "33",
+            "blue" => "34",
+            "magenta" => "35",
+            "cyan" => "36",
+            "white" => "37",
+            "gray" => "90",
+            "bright_red" => "91",
+            "bright_green" => "92",
+            "bright_yellow" => "93",
+            "bright_blue" => "94",
+            "bright_magenta" => "95",
+            "bright_cyan" => "96",
+            "bright_white" => "97",
+            "bg_black" => "40",
+            "bg_red" => "41",
+            "bg_green" => "42",
+            "bg_yellow" => "43",
+            "bg_blue" => "44",
+            "bg_magenta" => "45",
+            "bg_cyan" => "46",
+            "bg_white" => "47",
+            "bg_gray" => "100",
+            "bg_bright_red" => "101",
+            "bg_bright_green" => "102",
+            "bg_bright_yellow" => "103",
+            "bg_bright_blue" => "104",
+            "bg_bright_magenta" => "105",
+            "bg_bright_cyan" => "106",
+            "bg_bright_white" => "107",
+
+            _ => panic!("Unknown style type: {}", fragment),
+        };
+
+        result.push_str(number_code);
+        last_loop_set = true;
     }
+
+    result.push('m');
+    Some(result)
 }
 
 fn panic_only_string() {
